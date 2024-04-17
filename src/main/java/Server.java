@@ -20,7 +20,7 @@ public class Server{
 	ArrayList<ClientThread> clients = new ArrayList<ClientThread>();
 	TheServer server;
 	private Consumer<Serializable> callback;
-	HashMap<Integer,String> usersOnServer;
+	HashMap<Integer,String> usersOnServer = new HashMap<>();
 
 
 	Server(Consumer<Serializable> call){
@@ -75,11 +75,15 @@ public class Server{
 			}
 			
 			public void updateClients(String message) {
+				System.out.println("ccurrent size " + clients.size());
+				System.out.println("ccurrent size " + usersOnServer.size());
 				for(int i = 0; i < clients.size(); i++) {
 					ClientThread t = clients.get(i);
 					try {
+						System.out.println(t.message.clientUser);
 						t.message.usersOnClient = usersOnServer;
-					 t.out.writeObject(message);
+						System.out.println(t.message.clientUser + " " + t.message.usersOnClient.size());
+						t.out.writeObject(t.message);
 					}
 					catch(Exception e) {}
 				}
@@ -96,12 +100,13 @@ public class Server{
 					System.out.println("Streams not open");
 				}
 				
-				updateClients("new client on server: client #"+count);
+//				updateClients("new client on server: client #"+count);
 					
 				 while(true) {
 					    try {
 							System.out.println("WEW");
 							message = (Message) in.readObject();
+							System.out.println(message.clientUser);
 							usersOnServer.put(this.count, message.clientUser);
 							callback.accept("client: " + count + " sent: " + message.clientUser);
 							System.out.println("WEW");

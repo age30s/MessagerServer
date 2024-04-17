@@ -7,9 +7,8 @@ public class Message implements Serializable {
     String outMessage;
     String clientUser;
 
+    String message;
     HashMap<Integer, String> usersOnClient = new HashMap<>();
-    String user;
-
 
     public Message(String user){
         this.clientUser = user;
