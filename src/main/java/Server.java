@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.function.Consumer;
 
 import javafx.application.Platform;
@@ -19,8 +20,9 @@ public class Server{
 	ArrayList<ClientThread> clients = new ArrayList<ClientThread>();
 	TheServer server;
 	private Consumer<Serializable> callback;
-	
-	
+	HashMap<Integer,String> usersOnServer;
+
+
 	Server(Consumer<Serializable> call){
 	
 		callback = call;
@@ -62,16 +64,21 @@ public class Server{
 			int count;
 			ObjectInputStream in;
 			ObjectOutputStream out;
+
+			Message message;
+
+			String user;
 			
 			ClientThread(Socket s, int count){
 				this.connection = s;
-				this.count = count;	
+				this.count = count;
 			}
 			
 			public void updateClients(String message) {
 				for(int i = 0; i < clients.size(); i++) {
 					ClientThread t = clients.get(i);
 					try {
+						t.message.usersOnClient = usersOnServer;
 					 t.out.writeObject(message);
 					}
 					catch(Exception e) {}
@@ -93,10 +100,12 @@ public class Server{
 					
 				 while(true) {
 					    try {
-					    	String data = in.readObject().toString();
-					    	callback.accept("client: " + count + " sent: " + data);
-					    	updateClients("client #"+count+" said: "+data);
-					    	
+							System.out.println("WEW");
+							message = (Message) in.readObject();
+							usersOnServer.put(this.count, message.clientUser);
+							callback.accept("client: " + count + " sent: " + message.clientUser);
+							System.out.println("WEW");
+							updateClients("client #"+count+" said: "+ message.clientUser);
 					    	}
 					    catch(Exception e) {
 					    	callback.accept("OOOOPPs...Something wrong with the socket from client: " + count + "....closing down!");

@@ -20,7 +20,7 @@ public class GuiServer extends Application{
 
 	HashMap<String, Scene> sceneMap;
 	Server serverConnection;
-	
+
 	ListView<String> listItems, listItems2;
 	
 	

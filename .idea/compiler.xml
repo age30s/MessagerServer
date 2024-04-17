@@ -6,6 +6,8 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="JavaFXGUIServer" />
+        <module name="Project3" />
         <module name="Project3Server" />
       </profile>
     </annotationProcessing>
