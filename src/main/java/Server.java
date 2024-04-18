@@ -69,11 +69,13 @@ public class Server{
 
 			Message message;
 
+
 			String user;
 			
 			ClientThread(Socket s, int count){
 				this.connection = s;
 				this.count = count;
+
 			}
 			
 			public void updateClients(Message message) {
@@ -84,21 +86,30 @@ public class Server{
 //				synchronized () {
 					for (int i = 0; i < clients.size(); i++) {
 						System.out.println("i:" + i);
+						ClientThread t = clients.get(i);
 						try {
-							ClientThread t = clients.get(i);
-							System.out.println(t.message.clientUser);
-							message.usersOnClient.clear();
-							message.usersOnClient.putAll(usersOnServer);
-//
-							System.out.println(message.clientUser + " " + message.usersOnClient.size());
-							if(Objects.equals(t.message.clientUser, message.outMessage)){
+							if(message.login == true){
+								System.out.println(message.message + "-------------------");
+								System.out.println(t.message.clientUser);
+								message.usersOnClient.clear();
+								message.usersOnClient.putAll(usersOnServer);
+								System.out.println(message.clientUser + " " + message.usersOnClient.size());
+//								message.login = false;
+								System.out.println("Going to the if: ");
 								t.out.writeObject(message);
 							}
-							t.out.writeObject(message);
+							System.out.println("t.message.clientUser: " + t.message.clientUser + " ------- " + "message.outMessage: " + message.outMessage );
+							if(Objects.equals(t.message.clientUser, message.outMessage)){
+								System.out.println("Going herer: " + message.outMessage);
+								t.out.writeObject(message);
+							}
+
 						} catch (Exception e) {
 						}
 					//}
 				}
+					System.out.println("hellpppppp");
+					message.login = false;
 
 			}
 			
@@ -118,7 +129,7 @@ public class Server{
 				 while(true) {
 					    try {
 							message = (Message) in.readObject();
-							callback.accept("client: " + count + " sent: " + message.clientUser);
+							callback.accept("client: " + count + " sent: " + message.outMessage);
 							// probs creating duplicates on the arraylist
 							usersOnServer.put(count, message.clientUser);
 							updateClients(message);
