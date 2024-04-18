@@ -77,9 +77,9 @@ public class Server{
 			}
 			
 			public void updateClients(Message message) {
-				System.out.println("recieving : " + message.message);
-				System.out.println("ccurrent size " + clients.size());
-				System.out.println("ccurrent size " + usersOnServer.size());
+//				System.out.println("recieving : " + message.message);
+//				System.out.println("ccurrent size " + clients.size());
+//				System.out.println("ccurrent size " + usersOnServer.size());
 
 //				synchronized () {
 					for (int i = 0; i < clients.size(); i++) {
@@ -89,7 +89,7 @@ public class Server{
 							System.out.println(t.message.clientUser);
 							message.usersOnClient.clear();
 							message.usersOnClient.putAll(usersOnServer);
-//							
+//
 							System.out.println(message.clientUser + " " + message.usersOnClient.size());
 							if(Objects.equals(t.message.clientUser, message.outMessage)){
 								t.out.writeObject(message);
