@@ -83,17 +83,18 @@ public class Server{
 
 //				synchronized () {
 					for (int i = 0; i < clients.size(); i++) {
+						System.out.println("i:" + i);
 						try {
 							ClientThread t = clients.get(i);
+							System.out.println(t.message.clientUser);
+							message.usersOnClient.clear();
+							message.usersOnClient.putAll(usersOnServer);
+//							
+							System.out.println(message.clientUser + " " + message.usersOnClient.size());
 							if(Objects.equals(t.message.clientUser, message.outMessage)){
 								t.out.writeObject(message);
 							}
-							else{
-								System.out.println(t.message.clientUser);
-								message.usersOnClient = usersOnServer;
-								System.out.println(message.clientUser + " " + message.usersOnClient.size());
-								t.out.writeObject(message);
-							}
+							t.out.writeObject(message);
 						} catch (Exception e) {
 						}
 					//}
