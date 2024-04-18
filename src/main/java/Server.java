@@ -5,6 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -22,7 +23,7 @@ public class Server{
 	ArrayList<ClientThread> clients = new ArrayList<ClientThread>();
 	TheServer server;
 	private Consumer<Serializable> callback;
-	HashMap<Integer,String> usersOnServer = new HashMap<>();
+	Map<String,ClientThread> usersOnServer = new HashMap<>();
 
 
 	Server(Consumer<Serializable> call){
@@ -47,7 +48,7 @@ public class Server{
 				callback.accept("client has connected to server: " + "client #" + count);
 				clients.add(c);
 				c.start();
-				
+
 				count++;
 				
 			    }
@@ -67,7 +68,7 @@ public class Server{
 			ObjectInputStream in;
 			ObjectOutputStream out;
 
-			Message message;
+			String username = "";
 
 
 			String user;
@@ -84,33 +85,49 @@ public class Server{
 //				System.out.println("ccurrent size " + usersOnServer.size());
 
 //				synchronized () {
+
+				if(!Objects.equals(message.outMessage, "")){
+					try {
+						ClientThread sendTo = usersOnServer.get(message.outMessage);
+						System.out.println("Clienthread user found " + sendTo.username);
+						sendTo.out.writeObject(message);
+					}
+					catch (Exception e){
+						e.printStackTrace();
+					}
+
+					return;
+				}
 					for (int i = 0; i < clients.size(); i++) {
 						System.out.println("i:" + i);
 						ClientThread t = clients.get(i);
 						try {
-							if(message.login == true){
-								System.out.println(message.message + "-------------------");
-								System.out.println(t.message.clientUser);
-								message.usersOnClient.clear();
-								message.usersOnClient.putAll(usersOnServer);
-								System.out.println(message.clientUser + " " + message.usersOnClient.size());
-//								message.login = false;
-								System.out.println("Going to the if: ");
-								t.out.writeObject(message);
+
+							Message updatinglist = new Message(t.username);
+							for(Map.Entry<String,ClientThread> entry: usersOnServer.entrySet()){
+								updatinglist.usersOnClient.add(entry.getKey());
 							}
-							System.out.println("t.message.clientUser: " + t.message.clientUser + " ------- " + "message.outMessage: " + message.outMessage );
-							if(Objects.equals(t.message.clientUser, message.outMessage)){
-								System.out.println("Going herer: " + message.outMessage);
-								t.out.writeObject(message);
-							}
+
+							System.out.println(updatinglist.clientUser + " " + updatinglist.usersOnClient.size());
+//							ClientThread sendTo = usersOnServer.get(message.outMessage);
+							t.out.writeObject(updatinglist);
+		//								message.login = false;
+		//								t.out.writeObject(message);
+
+		//							System.out.println("t.message.clientUser: " + t.message.clientUser + " ------- " + "message.outMessage: " + message.outMessage );
+		//							if(Objects.equals(t.message.clientUser, message.outMessage)){
+		//								System.out.println("Going herer: " + message.outMessage);
+		//								// cli kavya , "hi", bantu -> bantu
+		//								t.out.writeObject(message);
+		//							}
 
 						} catch (Exception e) {
+							e.printStackTrace();
 						}
-					//}
-				}
-					System.out.println("hellpppppp");
-					message.login = false;
+					}
 
+				System.out.println("hellpppppp");
+				message.login = false;
 			}
 			
 			public void run(){
@@ -128,20 +145,34 @@ public class Server{
 					
 				 while(true) {
 					    try {
-							message = (Message) in.readObject();
-							callback.accept("client: " + count + " sent: " + message.outMessage);
+
+							Message temp = (Message) in.readObject(); //cli kavya, "hi", bantu
+							System.out.println(temp.clientUser + " send to " + temp.outMessage + " the message: " + temp.message);
+
+							if(Objects.equals(username, "")) {
+								username = temp.clientUser;
+								System.out.println(" Current clienthread name is " + this.username);
+								usersOnServer.put(this.username, this);
+
+								System.out.println( "Current map size is " + usersOnServer.size());
+							}
+
+//							message.message = temp.message;
+//							message.outMessage = temp.outMessage;
 							// probs creating duplicates on the arraylist
-							usersOnServer.put(count, message.clientUser);
-							updateClients(message);
+//							usersOnServer.put(count, temp.clientUser);
+							updateClients(temp);
+							callback.accept("client: " + count + " sent: " + temp.outMessage);
+
 						}
 					    catch(Exception e) {
 					    	//callback.accept("OOOOPPs...Something wrong with the socket from client: " + count + "....closing down!");
-					    	updateClients(message);
+//					    	updateClients(temp);
 					    	clients.remove(this);
 					    	break;
 					    }
 					}
-				}//end of run
+			}//end of run
 			
 			
 		}//end of client thread
