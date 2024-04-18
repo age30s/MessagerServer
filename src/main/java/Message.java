@@ -1,3 +1,5 @@
+import javafx.util.Pair;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,7 +10,11 @@ public class Message implements Serializable {
     String clientUser;
 
     String message;
-    HashMap<Integer, String> usersOnClient = new HashMap<>();
+
+//    Object lock = new Object();
+
+    HashMap<Integer,String> usersOnClient = new HashMap<>();
+
 
     public Message(String user){
         this.clientUser = user;

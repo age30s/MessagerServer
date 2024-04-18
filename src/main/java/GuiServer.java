@@ -66,8 +66,7 @@ public class GuiServer extends Application{
 		pane.setCenter(listItems);
 		pane.setStyle("-fx-font-family: 'serif'");
 		return new Scene(pane, 500, 400);
-		
-		
+
 	}
 
 

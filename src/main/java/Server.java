@@ -5,10 +5,12 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import javafx.application.Platform;
 import javafx.scene.control.ListView;
+import javafx.util.Pair;
 /*
  * Clicker: A: I really get it    B: No idea what you are talking about
  * C: kind of following
@@ -74,19 +76,29 @@ public class Server{
 				this.count = count;
 			}
 			
-			public void updateClients(String message) {
+			public void updateClients(Message message) {
+				System.out.println("recieving : " + message.message);
 				System.out.println("ccurrent size " + clients.size());
 				System.out.println("ccurrent size " + usersOnServer.size());
-				for(int i = 0; i < clients.size(); i++) {
-					ClientThread t = clients.get(i);
-					try {
-						System.out.println(t.message.clientUser);
-						t.message.usersOnClient = usersOnServer;
-						System.out.println(t.message.clientUser + " " + t.message.usersOnClient.size());
-						t.out.writeObject(t.message);
-					}
-					catch(Exception e) {}
+
+//				synchronized () {
+					for (int i = 0; i < clients.size(); i++) {
+						try {
+							ClientThread t = clients.get(i);
+							if(Objects.equals(t.message.clientUser, message.outMessage)){
+								t.out.writeObject(message);
+							}
+							else{
+								System.out.println(t.message.clientUser);
+								message.usersOnClient = usersOnServer;
+								System.out.println(message.clientUser + " " + message.usersOnClient.size());
+								t.out.writeObject(message);
+							}
+						} catch (Exception e) {
+						}
+					//}
 				}
+
 			}
 			
 			public void run(){
@@ -104,17 +116,15 @@ public class Server{
 					
 				 while(true) {
 					    try {
-							System.out.println("WEW");
 							message = (Message) in.readObject();
-							System.out.println(message.clientUser);
-							usersOnServer.put(this.count, message.clientUser);
 							callback.accept("client: " + count + " sent: " + message.clientUser);
-							System.out.println("WEW");
-							updateClients("client #"+count+" said: "+ message.clientUser);
-					    	}
+							// probs creating duplicates on the arraylist
+							usersOnServer.put(count, message.clientUser);
+							updateClients(message);
+						}
 					    catch(Exception e) {
-					    	callback.accept("OOOOPPs...Something wrong with the socket from client: " + count + "....closing down!");
-					    	updateClients("Client #"+count+" has left the server!");
+					    	//callback.accept("OOOOPPs...Something wrong with the socket from client: " + count + "....closing down!");
+					    	updateClients(message);
 					    	clients.remove(this);
 					    	break;
 					    }
