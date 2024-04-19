@@ -15,7 +15,9 @@ public class Message implements Serializable {
     String message;
     Boolean isEveryone = false;
     String exception;
+    Boolean grpMsg = false;
 
+    ArrayList<String> grpList = new ArrayList<>();
 //    Object lock = new Object();
 
     ArrayList<String> usersOnClient = new ArrayList<>();
@@ -32,5 +34,6 @@ public class Message implements Serializable {
 
     void setText(String s){
         message = s;
+
     }
 }

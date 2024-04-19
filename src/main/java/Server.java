@@ -91,6 +91,20 @@ public class Server{
 			}
 
 		}
+
+		public void messageGroup(Message temp)
+		{
+			for(String name: temp.grpList){
+				try{
+					ClientThread t = usersOnServer.get(name);
+					t.out.writeObject(temp);
+				}
+				catch (Exception e){
+					e.printStackTrace();
+				}
+			}
+		}
+
 		public void messageEveryone(Message m){
 			System.out.println("Message sending everyone: " + m.message + " true or false: " + m.isEveryone);
 			for (Map.Entry<String,ClientThread> entry : usersOnServer.entrySet()){
@@ -157,8 +171,14 @@ public class Server{
 					Message temp = (Message) in.readObject(); //cli kavya, "hi", bantu
 					System.out.println(temp.clientUser + " send to " + temp.outMessage + " the message: " + temp.message);
 					System.out.println("temp.isEveryone: " + temp.isEveryone);
+					System.out.println("temp.isGroup: " + temp.grpMsg + " " + temp.grpList.size());
 					if(temp.isEveryone == true){
 						messageEveryone(temp);
+					}
+
+
+					if(temp.grpMsg == true){
+						messageGroup(temp);
 					}
 
 					if(Objects.equals(username, "")) {
@@ -197,3 +217,9 @@ public class Server{
 
 	}//end of client thread
 }
+
+
+	
+	
+
+	
