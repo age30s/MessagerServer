@@ -13,6 +13,7 @@ public class Message implements Serializable {
     String clientUser;
     Boolean login = false;
     String message;
+    Boolean isEveryone = false;
 
 //    Object lock = new Object();
 
