@@ -14,6 +14,7 @@ public class Message implements Serializable {
     Boolean login = false;
     String message;
     Boolean isEveryone = false;
+    String exception;
 
 //    Object lock = new Object();
 

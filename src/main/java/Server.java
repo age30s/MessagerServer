@@ -78,8 +78,21 @@ public class Server{
 			this.count = count;
 
 		}
+		public void userAlreadyExists(){
+			try{
+				System.out.println("EXEPTIONNNNNN");
+				Message tempMessage = new Message(username);
+				tempMessage.exception = "Username already exists. Please select another username.";
+				username = "";
+				this.out.writeObject(tempMessage);
+
+			}catch (Exception e){
+				e.printStackTrace();
+			}
+
+		}
 		public void messageEveryone(Message m){
-			System.out.println("Message seding everyone: " + m.message + " true or false: " + m.isEveryone);
+			System.out.println("Message sending everyone: " + m.message + " true or false: " + m.isEveryone);
 			for (Map.Entry<String,ClientThread> entry : usersOnServer.entrySet()){
 				try{
 					ClientThread t = entry.getValue();
@@ -93,12 +106,6 @@ public class Server{
 		}
 
 		public void updateClients(Message message) {
-//				System.out.println("recieving : " + message.message);
-//				System.out.println("ccurrent size " + clients.size());
-//				System.out.println("ccurrent size " + usersOnServer.size());
-
-//				synchronized () {
-
 			if(!Objects.equals(message.outMessage, "")){
 				try {
 					ClientThread sendTo = usersOnServer.get(message.outMessage);
@@ -108,7 +115,6 @@ public class Server{
 				catch (Exception e){
 					e.printStackTrace();
 				}
-
 				return;
 			}
 			for (int i = 0; i < clients.size(); i++) {
@@ -122,18 +128,7 @@ public class Server{
 					}
 
 					System.out.println(updatinglist.clientUser + " " + updatinglist.usersOnClient.size());
-//							ClientThread sendTo = usersOnServer.get(message.outMessage);
 					t.out.writeObject(updatinglist);
-					//								message.login = false;
-					//								t.out.writeObject(message);
-
-					//							System.out.println("t.message.clientUser: " + t.message.clientUser + " ------- " + "message.outMessage: " + message.outMessage );
-					//							if(Objects.equals(t.message.clientUser, message.outMessage)){
-					//								System.out.println("Going herer: " + message.outMessage);
-					//								// cli kavya , "hi", bantu -> bantu
-					//								t.out.writeObject(message);
-					//							}
-
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -158,7 +153,7 @@ public class Server{
 
 			while(true) {
 				try {
-
+					Boolean isExist = false;
 					Message temp = (Message) in.readObject(); //cli kavya, "hi", bantu
 					System.out.println(temp.clientUser + " send to " + temp.outMessage + " the message: " + temp.message);
 					System.out.println("temp.isEveryone: " + temp.isEveryone);
@@ -168,8 +163,14 @@ public class Server{
 
 					if(Objects.equals(username, "")) {
 						username = temp.clientUser;
-						System.out.println(" Current clienthread name is " + this.username);
-						usersOnServer.put(this.username, this);
+						System.out.println(" Current clienthread name is " + temp.clientUser);
+						if(usersOnServer.containsKey(temp.clientUser)){
+							userAlreadyExists();
+							continue;
+						}else{
+							usersOnServer.put(this.username, this);
+						}
+
 
 						System.out.println( "Current map size is " + usersOnServer.size());
 					}
@@ -183,9 +184,11 @@ public class Server{
 
 				}
 				catch(Exception e) {
-					//callback.accept("OOOOPPs...Something wrong with the socket from client: " + count + "....closing down!");
-//					    	updateClients(temp);
+					callback.accept("OOOOPPs...Something wrong with the socket from client: " + count + "....closing down!");
 					clients.remove(this);
+					usersOnServer.remove(this.username,this);
+//					Message temp = new Message("default");
+//					updateClients(temp);
 					break;
 				}
 			}
