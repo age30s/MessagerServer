@@ -106,7 +106,6 @@ public class Server{
 		}
 
 		public void messageEveryone(Message m){
-			System.out.println("Message sending everyone: " + m.message + " true or false: " + m.isEveryone);
 			for (Map.Entry<String,ClientThread> entry : usersOnServer.entrySet()){
 				try{
 					ClientThread t = entry.getValue();
@@ -123,9 +122,12 @@ public class Server{
 			if(!Objects.equals(message.outMessage, "")){
 				try {
 					ClientThread sendTo = usersOnServer.get(message.outMessage);
-					System.out.println("Clienthread user found " + sendTo.username);
+					for(Map.Entry<String,ClientThread> entry: usersOnServer.entrySet()){
+						message.usersOnClient.add(entry.getKey());
+					}
 					sendTo.out.writeObject(message);
 				}
+
 				catch (Exception e){
 					e.printStackTrace();
 				}
@@ -137,6 +139,11 @@ public class Server{
 				try {
 
 					Message updatinglist = new Message(t.username);
+
+					if(message.login){
+						updatinglist.login = true;
+					}
+
 					for(Map.Entry<String,ClientThread> entry: usersOnServer.entrySet()){
 						updatinglist.usersOnClient.add(entry.getKey());
 					}
@@ -148,7 +155,6 @@ public class Server{
 				}
 			}
 
-			System.out.println("hellpppppp");
 			message.login = false;
 		}
 
@@ -163,19 +169,15 @@ public class Server{
 				System.out.println("Streams not open");
 			}
 
-//				updateClients("new client on server: client #"+count);
 
 			while(true) {
 				try {
 					Boolean isExist = false;
 					Message temp = (Message) in.readObject(); //cli kavya, "hi", bantu
-					System.out.println(temp.clientUser + " send to " + temp.outMessage + " the message: " + temp.message);
-					System.out.println("temp.isEveryone: " + temp.isEveryone);
-					System.out.println("temp.isGroup: " + temp.grpMsg + " " + temp.grpList.size());
+
 					if(temp.isEveryone == true){
 						messageEveryone(temp);
 					}
-
 
 					if(temp.grpMsg == true){
 						messageGroup(temp);
@@ -183,7 +185,6 @@ public class Server{
 
 					if(Objects.equals(username, "")) {
 						username = temp.clientUser;
-						System.out.println(" Current clienthread name is " + temp.clientUser);
 						if(usersOnServer.containsKey(temp.clientUser)){
 							userAlreadyExists();
 							continue;
@@ -191,14 +192,8 @@ public class Server{
 							usersOnServer.put(this.username, this);
 						}
 
-
-						System.out.println( "Current map size is " + usersOnServer.size());
 					}
 
-//							message.message = temp.message;
-//							message.outMessage = temp.outMessage;
-					// probs creating duplicates on the arraylist
-//							usersOnServer.put(count, temp.clientUser);
 					updateClients(temp);
 					callback.accept("client: " + count + " sent: " + temp.outMessage);
 
@@ -207,8 +202,9 @@ public class Server{
 					callback.accept("OOOOPPs...Something wrong with the socket from client: " + count + "....closing down!");
 					clients.remove(this);
 					usersOnServer.remove(this.username,this);
-//					Message temp = new Message("default");
-//					updateClients(temp);
+					Message temp = new Message("default");
+					temp.outMessage = "";
+					updateClients(temp);
 					break;
 				}
 			}
