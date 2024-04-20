@@ -80,7 +80,7 @@ public class Server{
 		}
 		public void userAlreadyExists(){
 			try{
-				System.out.println("EXEPTIONNNNNN");
+
 				Message tempMessage = new Message(username);
 				tempMessage.exception = "Username already exists. Please select another username.";
 				username = "";
@@ -134,7 +134,6 @@ public class Server{
 				return;
 			}
 			for (int i = 0; i < clients.size(); i++) {
-				System.out.println("i:" + i);
 				ClientThread t = clients.get(i);
 				try {
 
@@ -144,11 +143,14 @@ public class Server{
 						updatinglist.login = true;
 					}
 
+					if(Objects.equals(message.exception, "closed")){
+						updatinglist.exception = "closed";
+					}
+
 					for(Map.Entry<String,ClientThread> entry: usersOnServer.entrySet()){
 						updatinglist.usersOnClient.add(entry.getKey());
 					}
 
-					System.out.println(updatinglist.clientUser + " " + updatinglist.usersOnClient.size());
 					t.out.writeObject(updatinglist);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -172,8 +174,7 @@ public class Server{
 
 			while(true) {
 				try {
-					Boolean isExist = false;
-					Message temp = (Message) in.readObject(); //cli kavya, "hi", bantu
+					Message temp = (Message) in.readObject();
 
 					if(temp.isEveryone == true){
 						messageEveryone(temp);
@@ -204,6 +205,7 @@ public class Server{
 					usersOnServer.remove(this.username,this);
 					Message temp = new Message("default");
 					temp.outMessage = "";
+					temp.exception = "closed!";
 					updateClients(temp);
 					break;
 				}

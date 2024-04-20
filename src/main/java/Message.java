@@ -18,7 +18,6 @@ public class Message implements Serializable {
     Boolean grpMsg = false;
 
     ArrayList<String> grpList = new ArrayList<>();
-//    Object lock = new Object();
 
     ArrayList<String> usersOnClient = new ArrayList<>();
 
