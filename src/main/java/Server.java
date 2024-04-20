@@ -119,6 +119,7 @@ public class Server{
 		}
 
 		public void updateClients(Message message) {
+
 			if(!Objects.equals(message.outMessage, "")){
 				try {
 					ClientThread sendTo = usersOnServer.get(message.outMessage);
@@ -205,7 +206,7 @@ public class Server{
 					usersOnServer.remove(this.username,this);
 					Message temp = new Message("default");
 					temp.outMessage = "";
-					temp.exception = "closed!";
+					temp.exception = "closed";
 					updateClients(temp);
 					break;
 				}
